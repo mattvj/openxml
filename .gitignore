@@ -1,0 +1,8 @@
+# IDEA Ignore
+.idea
+
+# Node
+node_modules/
+
+# babel
+lib/
