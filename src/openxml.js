@@ -272,18 +272,18 @@ var JSZip = require('jszip');
             }, 10);
         }
 
-        openXml.OpenXmlPackage = async function (documentToOpen) {
+        openXml.OpenXmlPackage = function (documentToOpen) {
             this.parts = {};
             this.ctXDoc = null;
             if (documentToOpen !== undefined) {
                 if (openXml.util.isBase64(documentToOpen)) {
-                    await openFromBase64Internal(this, documentToOpen);
+                    openFromBase64Internal(this, documentToOpen);
                 }
                 else if (typeof documentToOpen === 'string') {
                     openFromFlatOpcInternal(this, documentToOpen);
                 }
                 else {
-                    await openFromBlobInternal(this, documentToOpen);
+                    openFromBlobInternal(this, documentToOpen);
                 }
             }
         }
