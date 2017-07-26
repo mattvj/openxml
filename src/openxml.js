@@ -340,9 +340,7 @@ var JSZip = require('jszip');
                             zip.file(name, thisPart.data, { binary: true});
                         }
                         if (thisPart.partType === "xml" && typeof thisPart.data === "string") {
-                            var data = thisPart.data;
-                            var utf8 = openXml.util.encode_utf8(data);
-                            zip.file(name, utf8);
+                            zip.file(name, thisPart.data);
                         }
                         if (thisPart.partType === "xml" && thisPart.data.nodeType) {
                             zip.file(name, thisPart.data.toString(false));
@@ -357,13 +355,13 @@ var JSZip = require('jszip');
                                 sp.push(nsp.substring(pos, pos + 76) + '\n');
                                 pos += 76;
                             }
-                            zip.file(name, sp.join(''), { base64: true });
+                            zip.file(name, sp.join(''), { base64: true, binary: false });
                         }
                     }
                 }
             }
 
-            return zip.generateAsync({type});
+            return zip.generateAsync({type, compression: "DEFLATE"});
         }
 
         openXml.OpenXmlPackage.prototype.saveToBase64 = function (cb) {
