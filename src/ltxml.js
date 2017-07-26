@@ -2688,7 +2688,7 @@ var Enumerable = require('linq');
                     return el;
                 }
 
-                if (node.nodeType === 2) {
+                if (nodeType === 2) {
                     if (node.namespaceURI === null || node.namespaceURI === undefined ||
                             (node.namespaceURI === "" && node.prefix !== "xmlns")) {
                         if (node.prefix === "xml") {
