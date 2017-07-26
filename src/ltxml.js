@@ -2639,8 +2639,10 @@ var Enumerable = require('linq');
                 xcd, xcm, pi, xdec, cnt1, cnt2, cnt3, tn, newAtt,
                 cn_doc, cnt4, nc, version, encoding, standalone;
 
-            if (node.nodeType) {
-                if (node.nodeType === 1) {
+            var nodeType = node.nodeType || 2;
+
+            if (nodeType) {
+                if (nodeType === 1) {
                     if (node.namespaceURI === null ||
                         node.namespaceURI === undefined ||
                         (node.namespaceURI === "" && node.nodeName !== "xmlns")) {
@@ -2728,7 +2730,7 @@ var Enumerable = require('linq');
                     return at;
                 }
 
-                if (node.nodeType === 3) {
+                if (nodeType === 3) {
                     nc = [];
                     addContentThatCanContainEntities(node.nodeValue, null, true, function (c) {
                         nc.push(c);
@@ -2736,12 +2738,12 @@ var Enumerable = require('linq');
                     return nc;
                 }
 
-                if (node.nodeType === 4) {
+                if (nodeType === 4) {
                     xcd = new Ltxml.XCData(node.nodeValue);
                     return xcd;
                 }
 
-                if (node.nodeType === 7) {
+                if (nodeType === 7) {
                     if (node.target === 'xml') {
                         return null;
                     }
@@ -2749,12 +2751,12 @@ var Enumerable = require('linq');
                     return pi;
                 }
 
-                if (node.nodeType === 8) {
+                if (nodeType === 8) {
                     xcm = new Ltxml.XComment(node.nodeValue);
                     return xcm;
                 }
 
-                if (node.nodeType === 9) {
+                if (nodeType === 9) {
                     version = node.xmlVersion;
                     encoding = node.xmlEncoding;
                     standalone = node.xmlStandalone;
