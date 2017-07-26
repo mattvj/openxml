@@ -1,3 +1,3 @@
-var openXml = require('src/openxml');
+var openXml = require('./src/openxml');
 
 module.exports = openXml;
