@@ -1,89 +1,89 @@
 ﻿/***************************************************************************
 
-Copyright (c) Microsoft Corporation 2013.
+ Copyright (c) Microsoft Corporation 2013.
 
-This code is licensed using the Microsoft Public License (Ms-PL).  You can find the text of the license here:
+ This code is licensed using the Microsoft Public License (Ms-PL).  You can find the text of the license here:
 
-http://www.microsoft.com/resources/sharedsource/licensingbasics/publiclicense.mspx
+ http://www.microsoft.com/resources/sharedsource/licensingbasics/publiclicense.mspx
 
-Published at http://OpenXmlDeveloper.org
-Resource Center and Documentation: http://openxmldeveloper.org/wiki/w/wiki/open-xml-sdk-for-javascript.aspx
+ Published at http://OpenXmlDeveloper.org
+ Resource Center and Documentation: http://openxmldeveloper.org/wiki/w/wiki/open-xml-sdk-for-javascript.aspx
 
-Developer: Eric White
-Blog: http://www.ericwhite.com
-Twitter: @EricWhiteDev
-Email: eric@ericwhite.com
+ Developer: Eric White
+ Blog: http://www.ericwhite.com
+ Twitter: @EricWhiteDev
+ Email: eric@ericwhite.com
 
-Version: 1.01.01
-    Fixed a problem where serialization of UTF8 was not correct if the XDocument for the
-    part was not loaded.
+ Version: 1.01.01
+ Fixed a problem where serialization of UTF8 was not correct if the XDocument for the
+ part was not loaded.
 
-Version: 1.01
-    Added support for loading and saving blobs.
-    In distribution, replaced jszip.js, jszip-load.js, jszip-inflate.js, jszip-deflate.js
-    Added support for asynchronous loading and saving of blobs, flatOpc, and base64
+ Version: 1.01
+ Added support for loading and saving blobs.
+ In distribution, replaced jszip.js, jszip-load.js, jszip-inflate.js, jszip-deflate.js
+ Added support for asynchronous loading and saving of blobs, flatOpc, and base64
 
-Version: 1.00
-    Initial release.
+ Version: 1.00
+ Initial release.
 
-***************************************************************************/
+ ***************************************************************************/
 
 /*
-OpenXmlPackage(document)
-- document can be either base64 DOCX or FlatOPC in string form
-- fields:
-  - parts: hash of OpenXmlPart objects, by uri
-  - ctXDoc: XDocument of content type file
+ OpenXmlPackage(document)
+ - document can be either base64 DOCX or FlatOPC in string form
+ - fields:
+ - parts: hash of OpenXmlPart objects, by uri
+ - ctXDoc: XDocument of content type file
 
-- addPart(uri, contentType, partType, data)
-- addRelationship(rId, relationshipType, target, targetMode) - if targetMode is not set, then it is internal
-- deletePart(part)
-- deleteRelationship(rId)
-- getContentType(uri)
-- getPartById(rId) - gets part that is target of the package
-- getPartByRelationshipType(relationshipType)
-- getPartByUri(uri) - gets any part in the package
-- getParts() - returns all parts in the package
-- getPartsByContentType(contentType)
-- getPartsByRelationshipType(relationshipType)
-- getRelationshipById(rId) - gets one of the 2 or 3 relationships from the package
-- getRelationships() - gets the relationships from the package
-- getRelationshipsByContentType(contentType) - gets the relationships from the package
-- getRelationshipsByRelationshipType(relationshipType)
-- saveToBase64() - returns base64
-- saveToFlatOpc() - returns flatOpc
+ - addPart(uri, contentType, partType, data)
+ - addRelationship(rId, relationshipType, target, targetMode) - if targetMode is not set, then it is internal
+ - deletePart(part)
+ - deleteRelationship(rId)
+ - getContentType(uri)
+ - getPartById(rId) - gets part that is target of the package
+ - getPartByRelationshipType(relationshipType)
+ - getPartByUri(uri) - gets any part in the package
+ - getParts() - returns all parts in the package
+ - getPartsByContentType(contentType)
+ - getPartsByRelationshipType(relationshipType)
+ - getRelationshipById(rId) - gets one of the 2 or 3 relationships from the package
+ - getRelationships() - gets the relationships from the package
+ - getRelationshipsByContentType(contentType) - gets the relationships from the package
+ - getRelationshipsByRelationshipType(relationshipType)
+ - saveToBase64() - returns base64
+ - saveToFlatOpc() - returns flatOpc
 
-OpenXmlPart(pkg, uri, contentType, partType, data)
-- fields:
-  - pkg
-  - uri
-  - contentType
-  - partType   // "binary", "base64", "xml"
-  - data
+ OpenXmlPart(pkg, uri, contentType, partType, data)
+ - fields:
+ - pkg
+ - uri
+ - contentType
+ - partType   // "binary", "base64", "xml"
+ - data
 
-- addRelationship(rId, relationshipType, target, targetMode) - if targetMode is not set, then it is internal
-- deleteRelationship(rId)
-- getPartById(rId)
-- getPartByRelationshipType(relationshipType)
-- getParts() - returns all related parts of the source part
-- getPartsByContentType(contentType)
-- getPartsByRelationshipType(relationshipType)
-- getRelationshipById(rId) - gets the relationship from the part
-- getRelationships() - gets the relationships from the package
-- getRelationshipsByContentType(contentType) - gets the relationships from the part
-- getRelationshipsByRelationshipType(relationshipType) - gets the relationships from the part
-- getXDocument()
+ - addRelationship(rId, relationshipType, target, targetMode) - if targetMode is not set, then it is internal
+ - deleteRelationship(rId)
+ - getPartById(rId)
+ - getPartByRelationshipType(relationshipType)
+ - getParts() - returns all related parts of the source part
+ - getPartsByContentType(contentType)
+ - getPartsByRelationshipType(relationshipType)
+ - getRelationshipById(rId) - gets the relationship from the part
+ - getRelationships() - gets the relationships from the package
+ - getRelationshipsByContentType(contentType) - gets the relationships from the part
+ - getRelationshipsByRelationshipType(relationshipType) - gets the relationships from the part
+ - getXDocument()
 
-OpenXmlRelationship
-- fields:
-  - fromPkg - if from a part, this will be null
-  - fromPart - if from the package, this will be null.
-  - relationshipId
-  - relationshipType
-  - target
-  - targetMode
-  - targetFullName
-*/
+ OpenXmlRelationship
+ - fields:
+ - fromPkg - if from a part, this will be null
+ - fromPart - if from the package, this will be null.
+ - relationshipId
+ - relationshipType
+ - target
+ - targetMode
+ - targetFullName
+ */
 
 var Enumerable = require('linq');
 var Ltxml = require('./ltxml');
@@ -116,10 +116,10 @@ var JSZip = require('jszip');
 
         /******************************** OpenXmlPackage ********************************/
 
-        function openFromZip(zip, pkg) {
-        	var promises = [];
-        	var parts = [];
-        
+        async function openFromZip(zip, pkg) {
+            var promises = [];
+            var parts = [];
+
             for (var f in zip.files) {
                 var zipFile = zip.files[f];
                 if (!openXml.util.endsWith(f, "/")) {
@@ -136,35 +136,32 @@ var JSZip = require('jszip');
                 }
             }
 
-            return Promise.all(promises).then(function(values) {
-            
-            	for(var i = 0; i < parts.length; i++) {
-            		parts[i].data = values[i];
-            	}
-            	
-            }).then(function() {
-            	
-				var ctf = pkg.parts["[Content_Types].xml"];
-				if (ctf === null) {
-					throw "Invalid Open XML document: no [Content_Types].xml";
-				}
-			
-            	pkg.ctXDoc = XDocument.parse(ctf.data);
+            const values = await Promise.all(promises);
 
-				for (var part in pkg.parts) {
-					if (part === "[Content_Types].xml")
-						continue;
-					var ct = pkg.getContentType(part);
-					var thisPart = pkg.parts[part];
-					thisPart.contentType = ct;
-					if (openXml.util.endsWith(ct, "xml")) {
-						thisPart.partType = "xml";
-					}
-					if (!openXml.util.endsWith(ct, "xml")) {
-						thisPart.partType = "binary";
-					}
-				}
-            });            
+            for(var i = 0; i < parts.length; i++) {
+                parts[i].data = values[i];
+            }
+
+            var ctf = pkg.parts["[Content_Types].xml"];
+            if (ctf === null) {
+                throw "Invalid Open XML document: no [Content_Types].xml";
+            }
+
+            pkg.ctXDoc = XDocument.parse(ctf.data);
+
+            for (var part in pkg.parts) {
+                if (part === "[Content_Types].xml")
+                    continue;
+                var ct = pkg.getContentType(part);
+                var thisPart = pkg.parts[part];
+                thisPart.contentType = ct;
+                if (openXml.util.endsWith(ct, "xml")) {
+                    thisPart.partType = "xml";
+                }
+                if (!openXml.util.endsWith(ct, "xml")) {
+                    thisPart.partType = "binary";
+                }
+            }
         }
 
         async function openFromBase64Internal(pkg, base64data) {
@@ -174,20 +171,20 @@ var JSZip = require('jszip');
             });
             await openFromZip(zip, pkg)
         }
-        
+
         function openFromBase64InternalAsync(pkg, base64data, cb) {
             var zip = null;
             return JSZip.loadAsync(base64data, {
-				base64: true,
-				checkCRC32: false
-			}).then(function(zip) {
-				return openFromZip(zip, pkg, cb).then(function() {
-					if(cb) {
-						cb(pkg);
-					}
-					return pkg;
-				});
-			});
+                base64: true,
+                checkCRC32: false
+            }).then(function(zip) {
+                return openFromZip(zip, pkg, cb).then(function() {
+                    if(cb) {
+                        cb(pkg);
+                    }
+                    return pkg;
+                });
+            });
         }
 
         async function openFromBlobInternal(pkg, blob) {
@@ -198,13 +195,13 @@ var JSZip = require('jszip');
         function openFromBlobInternalAsync(pkg, blob, cb) {
             var zip = null;
             return JSZip.loadAsync(blob).then(function(zip) {
-				return openFromZip(zip, pkg, cb).then(function() {
-					if(cb) {
-						cb(pkg);
-					}
-					return pkg;
-				});
-			});
+                return openFromZip(zip, pkg, cb).then(function() {
+                    if(cb) {
+                        cb(pkg);
+                    }
+                    return pkg;
+                });
+            });
         }
 
         function openFlatOpcFromXDoc(pkg, doc) {
@@ -253,7 +250,7 @@ var JSZip = require('jszip');
             var xDoc = XDocument.parse(flatOpc);
             openFlatOpcFromXDoc(pkg, xDoc);
         }
-        
+
         function openFromFlatOpcInternalAsync(pkg, flatOpc, cb) {
             var doc = null;
             var state = 1;
@@ -306,85 +303,85 @@ var JSZip = require('jszip');
 
         function saveToZip(that, type) {
             var zip = new JSZip();
-			for (var part in that.parts) {
-				var ct;
-				var thisPart = that.parts[part];
-				// test for null because if the part was deleted, it will be set to null, not undefined
-				if (thisPart !== null) {
-					if (part === "[Content_Types].xml") {
-						zip.file("[Content_Types].xml", that.ctXDoc.toString(false));
-					}
-					else {
-						var cte = that.ctXDoc.getRoot().elements(CT.Override).firstOrDefault(function (e) {
-							return e.attribute("PartName").value === part;
-						});
-						if (cte === null) {
-							var extension = part
-								.substring(part.lastIndexOf('.') + 1)
-								.toLowerCase();
-							var dct = that.ctXDoc.getRoot().elements(CT.Default).firstOrDefault(function (e) {
-								return e.attribute("Extension").value.toLowerCase() === extension;
-							});
-							if (!dct) {
-								throw "internal error";
-							}
-							ct = dct.attribute("ContentType").value;
-						}
-						else {
-							ct = cte.attribute("ContentType").value;
-						}
+            for (var part in that.parts) {
+                var ct;
+                var thisPart = that.parts[part];
+                // test for null because if the part was deleted, it will be set to null, not undefined
+                if (thisPart !== null) {
+                    if (part === "[Content_Types].xml") {
+                        zip.file("[Content_Types].xml", that.ctXDoc.toString(false));
+                    }
+                    else {
+                        var cte = that.ctXDoc.getRoot().elements(CT.Override).firstOrDefault(function (e) {
+                            return e.attribute("PartName").value === part;
+                        });
+                        if (cte === null) {
+                            var extension = part
+                                .substring(part.lastIndexOf('.') + 1)
+                                .toLowerCase();
+                            var dct = that.ctXDoc.getRoot().elements(CT.Default).firstOrDefault(function (e) {
+                                return e.attribute("Extension").value.toLowerCase() === extension;
+                            });
+                            if (!dct) {
+                                throw "internal error";
+                            }
+                            ct = dct.attribute("ContentType").value;
+                        }
+                        else {
+                            ct = cte.attribute("ContentType").value;
+                        }
 
-						var name = part;
-						if (name.charAt(0) === "/") {
-							name = name.substring(1);
-						}
+                        var name = part;
+                        if (name.charAt(0) === "/") {
+                            name = name.substring(1);
+                        }
 
-						if (thisPart.partType === "binary") {
-							zip.file(name, thisPart.data, { binary: true});
-						}
-						if (thisPart.partType === "xml" && typeof thisPart.data === "string") {
-							var data = thisPart.data;
-							var utf8 = openXml.util.encode_utf8(data);
-							zip.file(name, utf8);
-						}
-						if (thisPart.partType === "xml" && thisPart.data.nodeType) {
-							zip.file(name, thisPart.data.toString(false));
-						}
-						if (thisPart.partType === "base64") {
-							var nsp = thisPart.data;
-							var sp = [];
-							var pos = 0;
-							var len = nsp.length;
-							while (true) {
-								if (pos >= len) { break; }
-								sp.push(nsp.substring(pos, pos + 76) + '\n');
-								pos += 76;
-							}
-							zip.file(name, sp.join(''), { base64: true });
-						}
-					}
-				}
-			}
-			
-			return zip.generateAsync({type});
+                        if (thisPart.partType === "binary") {
+                            zip.file(name, thisPart.data, { binary: true});
+                        }
+                        if (thisPart.partType === "xml" && typeof thisPart.data === "string") {
+                            var data = thisPart.data;
+                            var utf8 = openXml.util.encode_utf8(data);
+                            zip.file(name, utf8);
+                        }
+                        if (thisPart.partType === "xml" && thisPart.data.nodeType) {
+                            zip.file(name, thisPart.data.toString(false));
+                        }
+                        if (thisPart.partType === "base64") {
+                            var nsp = thisPart.data;
+                            var sp = [];
+                            var pos = 0;
+                            var len = nsp.length;
+                            while (true) {
+                                if (pos >= len) { break; }
+                                sp.push(nsp.substring(pos, pos + 76) + '\n');
+                                pos += 76;
+                            }
+                            zip.file(name, sp.join(''), { base64: true });
+                        }
+                    }
+                }
+            }
+
+            return zip.generateAsync({type});
         }
 
-        openXml.OpenXmlPackage.prototype.saveToBase64 = function (cb) {     	
-        	return saveToZip(this, 'base64').then(function(base64) {
-        		if(cb) {
-		        	cb(base64);
-		        }
-		        return base64;
-        	});
+        openXml.OpenXmlPackage.prototype.saveToBase64 = function (cb) {
+            return saveToZip(this, 'base64').then(function(base64) {
+                if(cb) {
+                    cb(base64);
+                }
+                return base64;
+            });
         };
 
         openXml.OpenXmlPackage.prototype.saveToBlob = function () {
-        	return saveToZip(this, 'blob').then(function(blob) {
-        		if(cb) {
-		        	cb(blob);
-		        }
-		        return blob;
-        	});
+            return saveToZip(this, 'blob').then(function(blob) {
+                if(cb) {
+                    cb(blob);
+                }
+                return blob;
+            });
         };
 
         openXml.OpenXmlPackage.prototype.saveToFlatOpc = function () {
@@ -477,7 +474,7 @@ var JSZip = require('jszip');
             }
             return flatOpc.toString(true);
         };
-        
+
         openXml.OpenXmlPackage.prototype.saveToFlatOpcAsync = function (cb) {
             var xdec = new XDeclaration("1.0", "UTF-8", "yes");
             var nsa = new XAttribute(XNamespace.xmlns + "pkg",
@@ -618,7 +615,7 @@ var JSZip = require('jszip');
 
             return newPart;
         }
-        
+
         openXml.OpenXmlPackage.prototype.deletePart = function (part) {
             var uri = part.uri;
             this.parts[uri] = null;
@@ -636,7 +633,7 @@ var JSZip = require('jszip');
                 ctEl.remove();
             }
         }
-        
+
         function getRelationshipsFromRelsXml(pkg, part, relationshipPart) {
             var rxDoc = relationshipPart.getXDocument();
             var rels = rxDoc.getRoot().elements(PKGREL.Relationship)
@@ -664,7 +661,7 @@ var JSZip = require('jszip');
             var rels = getRelationshipsFromRelsXml(this, null, rootRelationshipsPart);
             return rels;
         }
-        
+
         openXml.OpenXmlPackage.prototype.getParts = function () {
             var parts = [];
             for (var part in this.parts) {
@@ -675,7 +672,7 @@ var JSZip = require('jszip');
             }
             return parts;
         }
-        
+
         openXml.OpenXmlPackage.prototype.getRelationshipsByRelationshipType = function (relationshipType) {
             var rootRelationshipsPart = this.getPartByUri("/_rels/.rels");
             var rxDoc = rootRelationshipsPart.getXDocument();
@@ -702,7 +699,7 @@ var JSZip = require('jszip');
                 .toArray();
             return rels;
         }
-        
+
         openXml.OpenXmlPackage.prototype.getPartsByRelationshipType = function (relationshipType) {
             var rels = this.getRelationshipsByRelationshipType(relationshipType);
             var parts = [];
@@ -720,7 +717,7 @@ var JSZip = require('jszip');
             }
             return parts[0];
         }
-        
+
         openXml.OpenXmlPackage.prototype.getRelationshipsByContentType = function (contentType) {
             var rootRelationshipsPart = this.getPartByUri("/_rels/.rels");
             if (rootRelationshipsPart) {
@@ -740,7 +737,7 @@ var JSZip = require('jszip');
             }
             return [];
         }
-        
+
         openXml.OpenXmlPackage.prototype.getPartsByContentType = function (contentType) {
             var rels = this.getRelationshipsByContentType(contentType);
             var parts = [];
@@ -758,7 +755,7 @@ var JSZip = require('jszip');
                 });
             return rel;
         }
-        
+
         openXml.OpenXmlPackage.prototype.getPartById = function (rId) {
             var rel = Enumerable.from(this.getRelationships())
                 .firstOrDefault(function (r) {
@@ -770,7 +767,7 @@ var JSZip = require('jszip');
             var part = this.getPartByUri(rel.targetFullName);
             return part;
         }
-        
+
         openXml.OpenXmlPackage.prototype.getPartByUri = function (uri) {
             var part = this.parts[uri];
             return part;
@@ -817,7 +814,7 @@ var JSZip = require('jszip');
 
         openXml.OpenXmlPackage.prototype.getContentType = function (uri) {
             var ctfile, ct, c;
-                
+
             ct = this.ctXDoc.descendants(CT.Override)
                 .firstOrDefault(function (o) {
                     return o.attribute("PartName").value === uri;
@@ -884,7 +881,7 @@ var JSZip = require('jszip');
             }
             return pa;
         };
-        
+
         /*********** OpenXmlPart ***********/
 
         openXml.OpenXmlPart = function (pkg, uri, contentType, partType, data) {
@@ -897,7 +894,7 @@ var JSZip = require('jszip');
             }
             this.data = data;
         };
-        
+
         openXml.OpenXmlPart.prototype.getXDocument = function () {
             if (this.partType === 'xml' && typeof this.data === 'string') {
                 var data = this.data;
@@ -921,13 +918,13 @@ var JSZip = require('jszip');
             var relsFileName = uri.substring(0, lastSlash) + "/_rels/" + partFileName + ".rels";
             return relsFileName;
         }
-        
+
         function getRelsPartOfPart(part) {
             var relsFileName = getRelsPartUriOfPart(part);
             var relsPart = part.pkg.getPartByUri(relsFileName);
             return relsPart;
         }
-        
+
         // returns all relationships
         openXml.OpenXmlPart.prototype.getRelationships = function () {
             var relsPart = getRelsPartOfPart(this);
@@ -937,7 +934,7 @@ var JSZip = require('jszip');
             }
             return [];
         }
-        
+
         // returns all related parts of the source part
         openXml.OpenXmlPart.prototype.getParts = function () {
             var parts = [];
@@ -950,7 +947,7 @@ var JSZip = require('jszip');
             }
             return parts;
         }
-        
+
         openXml.OpenXmlPart.prototype.getRelationshipsByRelationshipType = function (relationshipType) {
             var rels = [];
             var allRels = this.getRelationships();
@@ -961,7 +958,7 @@ var JSZip = require('jszip');
             }
             return rels;
         }
-        
+
         // returns all related parts of the source part with the given relationship type
         openXml.OpenXmlPart.prototype.getPartsByRelationshipType = function (relationshipType) {
             var parts = [];
@@ -994,7 +991,7 @@ var JSZip = require('jszip');
             }
             return rels;
         }
-        
+
         openXml.OpenXmlPart.prototype.getPartsByContentType = function (contentType) {
             var parts = [];
             var rels = this.getRelationshipsByContentType(contentType);
@@ -1260,7 +1257,7 @@ var JSZip = require('jszip');
 
             this.targetFullName = workingCurrentPath + workingTarget;
         }
-        
+
         /******************************** OpenXmlRelationship ********************************/
 
         openXml.util = {};
@@ -1350,9 +1347,9 @@ var JSZip = require('jszip');
             bucketTimer.currentBucket = '';
             for (prop in bucketTimer) {
                 if (typeof bucketTimer[prop] !== 'function' &&
-                            prop !== 'currentTime' &&
-                            prop !== 'currentBucket' &&
-                            prop !== 'beginningTime') {
+                    prop !== 'currentTime' &&
+                    prop !== 'currentBucket' &&
+                    prop !== 'beginningTime') {
                     delete bucketTimer[prop];
                 }
             }
@@ -1403,9 +1400,9 @@ var JSZip = require('jszip');
             a = [];
             for (prop in bucketTimer) {
                 if (typeof bucketTimer[prop] !== 'function' &&
-                            prop !== 'currentTime' &&
-                            prop !== 'currentBucket' &&
-                            prop !== 'beginningTime') {
+                    prop !== 'currentTime' &&
+                    prop !== 'currentBucket' &&
+                    prop !== 'beginningTime') {
                     a.push(openXml.util.rPad(prop.toString(), 50, "-") + ': ' +
                         openXml.util.lPad(bucketTimer[prop].time.toString(), 8, " ") +
                         " " + openXml.util.lPad(bucketTimer[prop].count.toString(), 8, " "));
@@ -1432,10 +1429,10 @@ var JSZip = require('jszip');
         }
 
         var keyStr = "ABCDEFGHIJKLMNOP" +
-                       "QRSTUVWXYZabcdef" +
-                       "ghijklmnopqrstuv" +
-                       "wxyz0123456789+/" +
-                       "=";
+            "QRSTUVWXYZabcdef" +
+            "ghijklmnopqrstuv" +
+            "wxyz0123456789+/" +
+            "=";
 
         function getChar(input, i) {
             if (input.charAt(i) === '%') {
@@ -1455,7 +1452,7 @@ var JSZip = require('jszip');
                 i: i
             }
         }
-        
+
         openXml.util.encode64 = function (input) {
             input = escape(input);
             var output = "";
@@ -1487,17 +1484,17 @@ var JSZip = require('jszip');
                 }
 
                 output = output +
-                   keyStr.charAt(enc1) +
-                   keyStr.charAt(enc2) +
-                   keyStr.charAt(enc3) +
-                   keyStr.charAt(enc4);
+                    keyStr.charAt(enc1) +
+                    keyStr.charAt(enc2) +
+                    keyStr.charAt(enc3) +
+                    keyStr.charAt(enc4);
                 chr1 = chr2 = chr3 = "";
                 enc1 = enc2 = enc3 = enc4 = "";
             } while (i < input.length);
 
             return output;
         }
-        
+
         openXml.util.decode64 = function (input) {
             var output = "";
             var chr1, chr2, chr3 = "";
@@ -1508,8 +1505,8 @@ var JSZip = require('jszip');
             var base64test = /[^A-Za-z0-9\+\/\=]/g;
             if (base64test.exec(input)) {
                 alert("There were invalid base64 characters in the input text.\n" +
-                      "Valid base64 characters are A-Z, a-z, 0-9, '+', '/',and '='\n" +
-                      "Expect errors in decoding.");
+                    "Valid base64 characters are A-Z, a-z, 0-9, '+', '/',and '='\n" +
+                    "Expect errors in decoding.");
             }
             input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
 
@@ -1539,259 +1536,259 @@ var JSZip = require('jszip');
 
             return unescape(output);
         }
-        
+
         openXml.entityMap =
-        {
-            "160": "nbsp",
-            "161": "iexcl",
-            "162": "cent",
-            "163": "pound",
-            "164": "curren",
-            "165": "yen",
-            "166": "brvbar",
-            "167": "sect",
-            "168": "uml",
-            "169": "copy",
-            "170": "ordf",
-            "171": "laquo",
-            "172": "not",
-            "173": "shy",
-            "174": "reg",
-            "175": "macr",
-            "176": "deg",
-            "177": "plusmn",
-            "178": "sup2",
-            "179": "sup3",
-            "180": "acute",
-            "181": "micro",
-            "182": "para",
-            "183": "middot",
-            "184": "cedil",
-            "185": "sup1",
-            "186": "ordm",
-            "187": "raquo",
-            "188": "frac14",
-            "189": "frac12",
-            "190": "frac34",
-            "191": "iquest",
-            "192": "Agrave",
-            "193": "Aacute",
-            "194": "Acirc",
-            "195": "Atilde",
-            "196": "Auml",
-            "197": "Aring",
-            "198": "AElig",
-            "199": "Ccedil",
-            "200": "Egrave",
-            "201": "Eacute",
-            "202": "Ecirc",
-            "203": "Euml",
-            "204": "Igrave",
-            "205": "Iacute",
-            "206": "Icirc",
-            "207": "Iuml",
-            "208": "ETH",
-            "209": "Ntilde",
-            "210": "Ograve",
-            "211": "Oacute",
-            "212": "Ocirc",
-            "213": "Otilde",
-            "214": "Ouml",
-            "215": "times",
-            "216": "Oslash",
-            "217": "Ugrave",
-            "218": "Uacute",
-            "219": "Ucirc",
-            "220": "Uuml",
-            "221": "Yacute",
-            "222": "THORN",
-            "223": "szlig",
-            "224": "agrave",
-            "225": "aacute",
-            "226": "acirc",
-            "227": "atilde",
-            "228": "auml",
-            "229": "aring",
-            "230": "aelig",
-            "231": "ccedil",
-            "232": "egrave",
-            "233": "eacute",
-            "234": "ecirc",
-            "235": "euml",
-            "236": "igrave",
-            "237": "iacute",
-            "238": "icirc",
-            "239": "iuml",
-            "240": "eth",
-            "241": "ntilde",
-            "242": "ograve",
-            "243": "oacute",
-            "244": "ocirc",
-            "245": "otilde",
-            "246": "ouml",
-            "247": "divide",
-            "248": "oslash",
-            "249": "ugrave",
-            "250": "uacute",
-            "251": "ucirc",
-            "252": "uuml",
-            "253": "yacute",
-            "254": "thorn",
-            "255": "yuml",
-            "338": "OElig",
-            "339": "oelig",
-            "352": "Scaron",
-            "353": "scaron",
-            "376": "Yuml",
-            "402": "fnof",
-            "710": "circ",
-            "732": "tilde",
-            "913": "Alpha",
-            "914": "Beta",
-            "915": "Gamma",
-            "916": "Delta",
-            "917": "Epsilon",
-            "918": "Zeta",
-            "919": "Eta",
-            "920": "Theta",
-            "921": "Iota",
-            "922": "Kappa",
-            "923": "Lambda",
-            "924": "Mu",
-            "925": "Nu",
-            "926": "Xi",
-            "927": "Omicron",
-            "928": "Pi",
-            "929": "Rho",
-            "931": "Sigma",
-            "932": "Tau",
-            "933": "Upsilon",
-            "934": "Phi",
-            "935": "Chi",
-            "936": "Psi",
-            "937": "Omega",
-            "945": "alpha",
-            "946": "beta",
-            "947": "gamma",
-            "948": "delta",
-            "949": "epsilon",
-            "950": "zeta",
-            "951": "eta",
-            "952": "theta",
-            "953": "iota",
-            "954": "kappa",
-            "955": "lambda",
-            "956": "mu",
-            "957": "nu",
-            "958": "xi",
-            "959": "omicron",
-            "960": "pi",
-            "961": "rho",
-            "962": "sigmaf",
-            "963": "sigma",
-            "964": "tau",
-            "965": "upsilon",
-            "966": "phi",
-            "967": "chi",
-            "968": "psi",
-            "969": "omega",
-            "977": "thetasym",
-            "978": "upsih",
-            "982": "piv",
-            "8194": "ensp",
-            "8195": "emsp",
-            "8201": "thinsp",
-            "8204": "zwnj",
-            "8205": "zwj",
-            "8206": "lrm",
-            "8207": "rlm",
-            "8211": "ndash",
-            "8212": "mdash",
-            "8216": "lsquo",
-            "8217": "rsquo",
-            "8218": "sbquo",
-            "8220": "ldquo",
-            "8221": "rdquo",
-            "8222": "bdquo",
-            "8224": "dagger",
-            "8225": "Dagger",
-            "8226": "bull",
-            "8230": "hellip",
-            "8240": "permil",
-            "8242": "prime",
-            "8243": "Prime",
-            "8249": "lsaquo",
-            "8250": "rsaquo",
-            "8254": "oline",
-            "8260": "frasl",
-            "8364": "euro",
-            "8465": "image",
-            "8472": "weierp",
-            "8476": "real",
-            "8482": "trade",
-            "8501": "alefsym",
-            "8592": "larr",
-            "8593": "uarr",
-            "8594": "rarr",
-            "8595": "darr",
-            "8596": "harr",
-            "8629": "crarr",
-            "8656": "lArr",
-            "8657": "uArr",
-            "8658": "rArr",
-            "8659": "dArr",
-            "8660": "hArr",
-            "8704": "forall",
-            "8706": "part",
-            "8707": "exist",
-            "8709": "empty",
-            "8711": "nabla",
-            "8712": "isin",
-            "8713": "notin",
-            "8715": "ni",
-            "8719": "prod",
-            "8721": "sum",
-            "8722": "minus",
-            "8727": "lowast",
-            "8730": "radic",
-            "8733": "prop",
-            "8734": "infin",
-            "8736": "ang",
-            "8743": "and",
-            "8744": "or",
-            "8745": "cap",
-            "8746": "cup",
-            "8747": "int",
-            "8756": "there4",
-            "8764": "sim",
-            "8773": "cong",
-            "8776": "asymp",
-            "8800": "ne",
-            "8801": "equiv",
-            "8804": "le",
-            "8805": "ge",
-            "8834": "sub",
-            "8835": "sup",
-            "8836": "nsub",
-            "8838": "sube",
-            "8839": "supe",
-            "8853": "oplus",
-            "8855": "otimes",
-            "8869": "perp",
-            "8901": "sdot",
-            "8968": "lceil",
-            "8969": "rceil",
-            "8970": "lfloor",
-            "8971": "rfloor",
-            "9001": "lang",
-            "9002": "rang",
-            "9674": "loz",
-            "9824": "spades",
-            "9827": "clubs",
-            "9829": "hearts",
-            "9830": "diams"
-        };
-        
+            {
+                "160": "nbsp",
+                "161": "iexcl",
+                "162": "cent",
+                "163": "pound",
+                "164": "curren",
+                "165": "yen",
+                "166": "brvbar",
+                "167": "sect",
+                "168": "uml",
+                "169": "copy",
+                "170": "ordf",
+                "171": "laquo",
+                "172": "not",
+                "173": "shy",
+                "174": "reg",
+                "175": "macr",
+                "176": "deg",
+                "177": "plusmn",
+                "178": "sup2",
+                "179": "sup3",
+                "180": "acute",
+                "181": "micro",
+                "182": "para",
+                "183": "middot",
+                "184": "cedil",
+                "185": "sup1",
+                "186": "ordm",
+                "187": "raquo",
+                "188": "frac14",
+                "189": "frac12",
+                "190": "frac34",
+                "191": "iquest",
+                "192": "Agrave",
+                "193": "Aacute",
+                "194": "Acirc",
+                "195": "Atilde",
+                "196": "Auml",
+                "197": "Aring",
+                "198": "AElig",
+                "199": "Ccedil",
+                "200": "Egrave",
+                "201": "Eacute",
+                "202": "Ecirc",
+                "203": "Euml",
+                "204": "Igrave",
+                "205": "Iacute",
+                "206": "Icirc",
+                "207": "Iuml",
+                "208": "ETH",
+                "209": "Ntilde",
+                "210": "Ograve",
+                "211": "Oacute",
+                "212": "Ocirc",
+                "213": "Otilde",
+                "214": "Ouml",
+                "215": "times",
+                "216": "Oslash",
+                "217": "Ugrave",
+                "218": "Uacute",
+                "219": "Ucirc",
+                "220": "Uuml",
+                "221": "Yacute",
+                "222": "THORN",
+                "223": "szlig",
+                "224": "agrave",
+                "225": "aacute",
+                "226": "acirc",
+                "227": "atilde",
+                "228": "auml",
+                "229": "aring",
+                "230": "aelig",
+                "231": "ccedil",
+                "232": "egrave",
+                "233": "eacute",
+                "234": "ecirc",
+                "235": "euml",
+                "236": "igrave",
+                "237": "iacute",
+                "238": "icirc",
+                "239": "iuml",
+                "240": "eth",
+                "241": "ntilde",
+                "242": "ograve",
+                "243": "oacute",
+                "244": "ocirc",
+                "245": "otilde",
+                "246": "ouml",
+                "247": "divide",
+                "248": "oslash",
+                "249": "ugrave",
+                "250": "uacute",
+                "251": "ucirc",
+                "252": "uuml",
+                "253": "yacute",
+                "254": "thorn",
+                "255": "yuml",
+                "338": "OElig",
+                "339": "oelig",
+                "352": "Scaron",
+                "353": "scaron",
+                "376": "Yuml",
+                "402": "fnof",
+                "710": "circ",
+                "732": "tilde",
+                "913": "Alpha",
+                "914": "Beta",
+                "915": "Gamma",
+                "916": "Delta",
+                "917": "Epsilon",
+                "918": "Zeta",
+                "919": "Eta",
+                "920": "Theta",
+                "921": "Iota",
+                "922": "Kappa",
+                "923": "Lambda",
+                "924": "Mu",
+                "925": "Nu",
+                "926": "Xi",
+                "927": "Omicron",
+                "928": "Pi",
+                "929": "Rho",
+                "931": "Sigma",
+                "932": "Tau",
+                "933": "Upsilon",
+                "934": "Phi",
+                "935": "Chi",
+                "936": "Psi",
+                "937": "Omega",
+                "945": "alpha",
+                "946": "beta",
+                "947": "gamma",
+                "948": "delta",
+                "949": "epsilon",
+                "950": "zeta",
+                "951": "eta",
+                "952": "theta",
+                "953": "iota",
+                "954": "kappa",
+                "955": "lambda",
+                "956": "mu",
+                "957": "nu",
+                "958": "xi",
+                "959": "omicron",
+                "960": "pi",
+                "961": "rho",
+                "962": "sigmaf",
+                "963": "sigma",
+                "964": "tau",
+                "965": "upsilon",
+                "966": "phi",
+                "967": "chi",
+                "968": "psi",
+                "969": "omega",
+                "977": "thetasym",
+                "978": "upsih",
+                "982": "piv",
+                "8194": "ensp",
+                "8195": "emsp",
+                "8201": "thinsp",
+                "8204": "zwnj",
+                "8205": "zwj",
+                "8206": "lrm",
+                "8207": "rlm",
+                "8211": "ndash",
+                "8212": "mdash",
+                "8216": "lsquo",
+                "8217": "rsquo",
+                "8218": "sbquo",
+                "8220": "ldquo",
+                "8221": "rdquo",
+                "8222": "bdquo",
+                "8224": "dagger",
+                "8225": "Dagger",
+                "8226": "bull",
+                "8230": "hellip",
+                "8240": "permil",
+                "8242": "prime",
+                "8243": "Prime",
+                "8249": "lsaquo",
+                "8250": "rsaquo",
+                "8254": "oline",
+                "8260": "frasl",
+                "8364": "euro",
+                "8465": "image",
+                "8472": "weierp",
+                "8476": "real",
+                "8482": "trade",
+                "8501": "alefsym",
+                "8592": "larr",
+                "8593": "uarr",
+                "8594": "rarr",
+                "8595": "darr",
+                "8596": "harr",
+                "8629": "crarr",
+                "8656": "lArr",
+                "8657": "uArr",
+                "8658": "rArr",
+                "8659": "dArr",
+                "8660": "hArr",
+                "8704": "forall",
+                "8706": "part",
+                "8707": "exist",
+                "8709": "empty",
+                "8711": "nabla",
+                "8712": "isin",
+                "8713": "notin",
+                "8715": "ni",
+                "8719": "prod",
+                "8721": "sum",
+                "8722": "minus",
+                "8727": "lowast",
+                "8730": "radic",
+                "8733": "prop",
+                "8734": "infin",
+                "8736": "ang",
+                "8743": "and",
+                "8744": "or",
+                "8745": "cap",
+                "8746": "cup",
+                "8747": "int",
+                "8756": "there4",
+                "8764": "sim",
+                "8773": "cong",
+                "8776": "asymp",
+                "8800": "ne",
+                "8801": "equiv",
+                "8804": "le",
+                "8805": "ge",
+                "8834": "sub",
+                "8835": "sup",
+                "8836": "nsub",
+                "8838": "sube",
+                "8839": "supe",
+                "8853": "oplus",
+                "8855": "otimes",
+                "8869": "perp",
+                "8901": "sdot",
+                "8968": "lceil",
+                "8969": "rceil",
+                "8970": "lfloor",
+                "8971": "rfloor",
+                "9001": "lang",
+                "9002": "rang",
+                "9674": "loz",
+                "9824": "spades",
+                "9827": "clubs",
+                "9829": "hearts",
+                "9830": "diams"
+            };
+
         function convertToEntities(text) {
             var o, len, i, c, cs, em, grouped, retValue, str;
 
