@@ -1401,13 +1401,13 @@ const JSZip = require('jszip');
       return s;
     };
 
-    openXml.util.encode_utf8 = function (s) {
-      return unescape(encodeURIComponent(s));
-    };
+    openXml.util.encode_utf8 = function(s) {
+      return s;
+    }
 
-    openXml.util.decode_utf8 = function (s) {
-      return decodeURIComponent(escape(s));
-    };
+    openXml.util.decode_utf8 = function(s) {
+      return s;
+    }
 
     const keyStr = "ABCDEFGHIJKLMNOP" +
       "QRSTUVWXYZabcdef" +
@@ -1443,13 +1443,13 @@ const JSZip = require('jszip');
       let i = 0;
 
       do {
-        const r = getChar(input, i);
+        let r = getChar(input, i);
         chr1 = r.chr;
         i = r.i;
-        const r = getChar(input, i);
+        r = getChar(input, i);
         chr2 = r.chr;
         i = r.i;
-        const r = getChar(input, i);
+        r = getChar(input, i);
         chr3 = r.chr;
         i = r.i;
 
@@ -5571,6 +5571,7 @@ const JSZip = require('jszip');
   // module export
   if (typeof define === typeof function () {
     } && define.amd) { // AMD
+    console.log('A');
     define("openxml", ["linq", "ltxml", "ltxml-extensions"],
       function (Enumerable, Ltxml, XEnumerable) {
         return defineOpenXml(Enumerable, Ltxml, XEnumerable);
