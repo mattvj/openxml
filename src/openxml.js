@@ -802,7 +802,7 @@ const JSZip = require('jszip');
         .firstOrDefault(function (o) {
           return o.attribute("PartName").value === uri;
         });
-      if (ct === null) {
+      if (!ct) {
         const exti = uri.lastIndexOf(".");
         const ext = uri.substring(exti + 1);
         const dct = this.ctXDoc.descendants(CT.Default)
